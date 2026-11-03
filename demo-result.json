@@ -1,0 +1,70 @@
+{
+  "project": "Automated Lead Management System v1.0",
+  "scenarios": [
+    {
+      "scenario": "valid_lead_intake_and_sync",
+      "http": 202,
+      "intake": {
+        "status": "accepted",
+        "lifecycle_status": "masuk",
+        "lead_id": "lead_demo_001",
+        "normalized": {
+          "name": "Andi Wijaya",
+          "email": "andi.wijaya@example.test",
+          "phone": "+6281234567890",
+          "source": "upwork_landing_page"
+        }
+      },
+      "delivery": {
+        "lead_id": "lead_demo_001",
+        "lifecycle_status": "sent",
+        "crm_id": "crm_live_sim_lead_demo_001",
+        "attempts": 1
+      }
+    },
+    {
+      "scenario": "duplicate_lead_id_ignored",
+      "http": 200,
+      "response": {
+        "status": "duplicate",
+        "dedup_by": "lead_id",
+        "lead_id": "lead_demo_001",
+        "lifecycle_status": "sent",
+        "crm_id": "crm_live_sim_lead_demo_001"
+      }
+    },
+    {
+      "scenario": "disposable_email_rejected",
+      "http": 422,
+      "error": "disposable_email_rejected",
+      "reason": "Email domain 'mailinator.com' is blocked as disposable or invalid."
+    },
+    {
+      "scenario": "timeout_then_idempotent_retry",
+      "attempt_1": {
+        "lead_id": "lead_demo_timeout",
+        "lifecycle_status": "timeout",
+        "error": "simulated_crm_timeout",
+        "attempts": 1
+      },
+      "attempt_2": {
+        "lead_id": "lead_demo_timeout",
+        "lifecycle_status": "sent",
+        "crm_id": "crm_live_sim_lead_demo_timeout",
+        "attempts": 2
+      }
+    }
+  ],
+  "final_metrics": {
+    "status_counts": {
+      "masuk": 0,
+      "processing": 0,
+      "timeout": 0,
+      "sent": 2,
+      "error": 0
+    },
+    "crm_records_count": 2,
+    "notifications_count": 3,
+    "attention_required": false
+  }
+}
